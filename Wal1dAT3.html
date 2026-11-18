@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwMDkwNzY4NzU0NDcxMDQxNzE3NiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzQ0ZjYzMzc0M2NlZTMzYjdfaW5kZXguaHRtbC05MiJ9LCJleHAiOjE3OTUwMzIzMzQsImlhdCI6MTc5NTAyODczNCwiYWxnIjoiUlMyNTYifQ.P4dosXn5IWNvU9Pz2WQGZUQxDBiCJJXGgniDlmEreZQNzSiLr6nJB-rGibskYoiKuEQNpdlGVzrr-5Fk88byF9-QoMBZUVk1ztoaw5E5KyCykayi3fl8ZSmdmCuDTnL_Q7RKEXObpoxUwzaWo509m7cx0JyLxdQlHuCdtllluTDqn8r5CmwbuW9plABdBKdEYpknyh4q_5uLC0vFyKPTSNrV2dP14o88N0qs1AoPXkcgUdZkZLyZA4_wGuJV5ybKAghCn0zArntdrAvnROvtQsrqi7LCuU-P1_Ni30G4Vd0tAa3va6Du1-R34qbu2lVYSielsgAtKdndl1wxsvYe6w","c_44f633743cee33b7_index.html-92")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.i=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.extensions="";var l=0,t=null,r=null,q=[],F=new TextEncoder,
+G=new TextDecoder;c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*
+16|0;return(f==="x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;
+(g=t)==null||g.postMessage(a)}};Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  const OVERLAY_SELECTOR =
+    'dialog[open], [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [role="combobox"]';
+
+  function isVisibleOverlay(element) {
+    if (element.closest('[hidden], [aria-hidden="true"], [inert]')) {
+      return false;
+    }
+    if (window.getComputedStyle(element).visibility === 'hidden') {
+      return false;
+    }
+    for (let cur = element; cur; cur = cur.parentElement) {
+      if (window.getComputedStyle(cur).display === 'none') {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function hasOpenOverlay() {
+    const candidates = document.querySelectorAll(OVERLAY_SELECTOR);
+    for (let i = 0; i < candidates.length; i++) {
+      if (isVisibleOverlay(candidates[i])) {
+        return true;
+      }
+    }
+    try {
+      if (document.querySelector('[popover]:popover-open')) {
+        return true;
+      }
+    } catch (e) {
+      // Ignore engines that do not support :popover-open.
+    }
+    return false;
+  }
+
+  function isNonEmptySearchInput(target) {
+    return (
+      Boolean(target) &&
+      target.tagName === 'INPUT' &&
+      typeof target.type === 'string' &&
+      target.type.toLowerCase() === 'search' &&
+      typeof target.value === 'string' &&
+      target.value.length > 0
+    );
+  }
+
+  function shouldIgnoreEscape(event) {
+    return (
+      event.key !== 'Escape' ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.isComposing ||
+      event.repeat ||
+      event.keyCode === 229 ||
+      isNonEmptySearchInput(event.target)
+    );
+  }
+
+  let shouldIgnoreCaptureState = false;
+
+  window.addEventListener(
+    'keydown',
+    function(event) {
+      if (event.key === 'Escape') {
+        shouldIgnoreCaptureState =
+          hasOpenOverlay() || isNonEmptySearchInput(event.target);
+      }
+    },
+    {capture: true},
+  );
+
+  window.addEventListener('keydown', function(event) {
+    if (
+      shouldIgnoreEscape(event) ||
+      event.defaultPrevented ||
+      shouldIgnoreCaptureState
+    ) {
+      return;
+    }
+    const wasBlockedOnCapture = shouldIgnoreCaptureState;
+    queueMicrotask(function() {
+      if (event.defaultPrevented || wasBlockedOnCapture) {
+        return;
+      }
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({'type': 'escapeKey'}, '*');
+      }
+    });
+  });
+})();</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wal1dAT3 // Direct P2P Voice &amp; Stream</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js" crossorigin="anonymous"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        carbon: '#0b0d10',
+                        graphite: '#12151b',
+                        surface: '#1a1e26',
+                        surfaceHover: '#222731',
+                        line: '#262c36',
+                        blurple: '#5865F2',
+                        blurpleHover: '#4752C4',
+                        voiceGreen: '#23a55a',
+                        dangerRed: '#da373c',
+                        warnAmber: '#f0b232'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: #262c36 transparent;
+        }
+        body {
+            background-color: #0b0d10;
+            color: #f2f3f5;
+            overflow: hidden;
+            user-select: none;
+        }
+        /* Speaking Indicators */
+        .tile-speaking {
+            box-shadow: inset 0 0 0 2px #23a55a, 0 0 20px -6px rgba(35, 165, 90, 0.35);
+            border-color: #23a55a !important;
+        }
+        .avatar-speaking {
+            box-shadow: 0 0 0 3px #12151b, 0 0 0 5px #23a55a;
+        }
+        .tree-avatar-speaking {
+            box-shadow: 0 0 0 2px #23a55a;
+        }
+        video {
+            background-color: #08090c;
+            object-fit: contain;
+        }
+        video.cover-mode {
+            object-fit: cover;
+        }
+        /* Range Slider */
+        input[type="range"] {
+            accent-color: #5865F2;
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Inter, sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:JetBrains Mono, monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.-bottom-0\.5{bottom:-0.125rem}.-right-0\.5{right:-0.125rem}.-right-1{right:-0.25rem}.-top-1{top:-0.25rem}.bottom-3{bottom:0.75rem}.bottom-5{bottom:1.25rem}.left-1\/2{left:50%}.left-3{left:0.75rem}.right-3{right:0.75rem}.right-4{right:1rem}.top-3{top:0.75rem}.top-4{top:1rem}.z-20{z-index:20}.z-30{z-index:30}.z-50{z-index:50}.mx-0\.5{margin-left:0.125rem;margin-right:0.125rem}.mb-0\.5{margin-bottom:0.125rem}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-3{margin-bottom:0.75rem}.ml-1{margin-left:0.25rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-1{height:0.25rem}.h-11{height:2.75rem}.h-12{height:3rem}.h-16{height:4rem}.h-2\.5{height:0.625rem}.h-20{height:5rem}.h-3\.5{height:0.875rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-7{height:1.75rem}.h-8{height:2rem}.h-full{height:100%}.h-screen{height:100vh}.max-h-\[72vh\]{max-height:72vh}.max-h-full{max-height:100%}.min-h-\[220px\]{min-height:220px}.w-11{width:2.75rem}.w-16{width:4rem}.w-2\.5{width:0.625rem}.w-20{width:5rem}.w-3\.5{width:0.875rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-7{width:1.75rem}.w-8{width:2rem}.w-\[260px\]{width:260px}.w-\[320px\]{width:320px}.w-full{width:100%}.w-px{width:1px}.w-screen{width:100vw}.min-w-0{min-width:0px}.max-w-\[220px\]{max-width:220px}.max-w-full{max-width:100%}.max-w-md{max-width:28rem}.max-w-xs{max-width:20rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.cursor-zoom-out{cursor:zoom-out}.select-none{-webkit-user-select:none;user-select:none}.select-text{-webkit-user-select:text;user-select:text}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-4{gap:1rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-line{--tw-border-opacity:1;border-color:rgb(38 44 54 / var(--tw-border-opacity, 1))}.border-white\/10{border-color:rgb(255 255 255 / 0.1)}.border-white\/20{border-color:rgb(255 255 255 / 0.2)}.bg-\[\#06b6d4\]{--tw-bg-opacity:1;background-color:rgb(6 182 212 / var(--tw-bg-opacity, 1))}.bg-\[\#0e1015\]{--tw-bg-opacity:1;background-color:rgb(14 16 21 / var(--tw-bg-opacity, 1))}.bg-\[\#101319\]{--tw-bg-opacity:1;background-color:rgb(16 19 25 / var(--tw-bg-opacity, 1))}.bg-\[\#14171f\]\/95{background-color:rgb(20 23 31 / 0.95)}.bg-\[\#23a55a\]{--tw-bg-opacity:1;background-color:rgb(35 165 90 / var(--tw-bg-opacity, 1))}.bg-\[\#5865F2\]{--tw-bg-opacity:1;background-color:rgb(88 101 242 / var(--tw-bg-opacity, 1))}.bg-\[\#8b5cf6\]{--tw-bg-opacity:1;background-color:rgb(139 92 246 / var(--tw-bg-opacity, 1))}.bg-\[\#da373c\]{--tw-bg-opacity:1;background-color:rgb(218 55 60 / var(--tw-bg-opacity, 1))}.bg-\[\#ec4899\]{--tw-bg-opacity:1;background-color:rgb(236 72 153 / var(--tw-bg-opacity, 1))}.bg-\[\#f0b232\]{--tw-bg-opacity:1;background-color:rgb(240 178 50 / var(--tw-bg-opacity, 1))}.bg-black\/70{background-color:rgb(0 0 0 / 0.7)}.bg-black\/75{background-color:rgb(0 0 0 / 0.75)}.bg-black\/85{background-color:rgb(0 0 0 / 0.85)}.bg-blurple{--tw-bg-opacity:1;background-color:rgb(88 101 242 / var(--tw-bg-opacity, 1))}.bg-carbon{--tw-bg-opacity:1;background-color:rgb(11 13 16 / var(--tw-bg-opacity, 1))}.bg-carbon\/40{background-color:rgb(11 13 16 / 0.4)}.bg-carbon\/50{background-color:rgb(11 13 16 / 0.5)}.bg-carbon\/60{background-color:rgb(11 13 16 / 0.6)}.bg-dangerRed{--tw-bg-opacity:1;background-color:rgb(218 55 60 / var(--tw-bg-opacity, 1))}.bg-graphite{--tw-bg-opacity:1;background-color:rgb(18 21 27 / var(--tw-bg-opacity, 1))}.bg-graphite\/60{background-color:rgb(18 21 27 / 0.6)}.bg-line{--tw-bg-opacity:1;background-color:rgb(38 44 54 / var(--tw-bg-opacity, 1))}.bg-surface{--tw-bg-opacity:1;background-color:rgb(26 30 38 / var(--tw-bg-opacity, 1))}.bg-surface\/70{background-color:rgb(26 30 38 / 0.7)}.bg-transparent{background-color:transparent}.bg-voiceGreen{--tw-bg-opacity:1;background-color:rgb(35 165 90 / var(--tw-bg-opacity, 1))}.object-contain{object-fit:contain}.p-1{padding:0.25rem}.p-1\.5{padding:0.375rem}.p-2{padding:0.5rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-24{padding-bottom:6rem}.pl-6{padding-left:1.5rem}.pr-1{padding-right:0.25rem}.pt-1{padding-top:0.25rem}.text-center{text-align:center}.font-mono{font-family:JetBrains Mono, monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.text-dangerRed{--tw-text-opacity:1;color:rgb(218 55 60 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-voiceGreen{--tw-text-opacity:1;color:rgb(35 165 90 / var(--tw-text-opacity, 1))}.text-warnAmber{--tw-text-opacity:1;color:rgb(240 178 50 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.placeholder-slate-500::placeholder{--tw-placeholder-opacity:1;color:rgb(100 116 139 / var(--tw-placeholder-opacity, 1))}.placeholder-slate-600::placeholder{--tw-placeholder-opacity:1;color:rgb(71 85 105 / var(--tw-placeholder-opacity, 1))}.accent-blurple{accent-color:#5865F2}.opacity-0{opacity:0}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_\#5865F2\]{--tw-shadow:0 0 10px #5865F2;--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.ring-2{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.ring-\[\#0e1015\]{--tw-ring-opacity:1;--tw-ring-color:rgb(14 16 21 / var(--tw-ring-opacity, 1))}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-shadow{transition-property:box-shadow;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-150{transition-duration:150ms}.focus-within\:border-blurple:focus-within{--tw-border-opacity:1;border-color:rgb(88 101 242 / var(--tw-border-opacity, 1))}.hover\:scale-105:hover{--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:bg-black:hover{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.hover\:bg-blurpleHover:hover{--tw-bg-opacity:1;background-color:rgb(71 82 196 / var(--tw-bg-opacity, 1))}.hover\:bg-surface:hover{--tw-bg-opacity:1;background-color:rgb(26 30 38 / var(--tw-bg-opacity, 1))}.hover\:bg-surface\/50:hover{background-color:rgb(26 30 38 / 0.5)}.hover\:bg-surfaceHover:hover{--tw-bg-opacity:1;background-color:rgb(34 39 49 / var(--tw-bg-opacity, 1))}.hover\:text-blurple:hover{--tw-text-opacity:1;color:rgb(88 101 242 / var(--tw-text-opacity, 1))}.hover\:text-dangerRed:hover{--tw-text-opacity:1;color:rgb(218 55 60 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:brightness-110:hover{--tw-brightness:brightness(1.1);filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.focus\:border-blurple:focus{--tw-border-opacity:1;border-color:rgb(88 101 242 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.group:hover .group-hover\:opacity-100{opacity:1}@media (min-width: 640px){.sm\:inline{display:inline}.sm\:hidden{display:none}}@media (min-width: 768px){.md\:h-24{height:6rem}.md\:w-24{width:6rem}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}}</style></head>
+<body class="h-screen w-screen flex flex-col bg-carbon antialiased">
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-xs w-full"></div>
+
+    <!-- Image Lightbox Modal -->
+    <div id="lightboxModal" onclick="closeLightbox()" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-6 cursor-zoom-out">
+        <img id="lightboxImg" src="" alt="Preview" class="max-w-full max-h-full rounded-lg border border-line shadow-2xl object-contain">
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-graphite border border-line rounded-xl max-w-md w-full overflow-hidden shadow-2xl">
+            <div class="px-5 py-4 border-b border-line flex items-center justify-between bg-carbon/50">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <h3 class="text-sm font-bold text-white tracking-tight">Настройки Wal1dAT3</h3>
+                </div>
+                <button onclick="toggleSettingsModal(false)" class="text-slate-400 hover:text-white p-1 rounded-md hover:bg-surface">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-4 text-xs">
+                <!-- Profile Section -->
+                <div>
+                    <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1.5">Твой никнейм</label>
+                    <input id="settingsNickInput" type="text" maxlength="20" class="w-full bg-carbon border border-line focus:border-blurple rounded-lg px-3 py-2 text-sm text-white focus:outline-none" placeholder="Введи никнейм...">
+                </div>
+
+                <!-- Avatar Color Picker -->
+                <div>
+                    <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1.5">Цвет аватарки</label>
+                    <div class="flex items-center gap-2" id="colorPickerRow">
+                        <button onclick="selectAvatarColor('#5865F2')" class="w-7 h-7 rounded-full bg-[#5865F2] border-2 border-white/20 hover:scale-105 transition"></button>
+                        <button onclick="selectAvatarColor('#23a55a')" class="w-7 h-7 rounded-full bg-[#23a55a] border-2 border-white/20 hover:scale-105 transition"></button>
+                        <button onclick="selectAvatarColor('#da373c')" class="w-7 h-7 rounded-full bg-[#da373c] border-2 border-white/20 hover:scale-105 transition"></button>
+                        <button onclick="selectAvatarColor('#f0b232')" class="w-7 h-7 rounded-full bg-[#f0b232] border-2 border-white/20 hover:scale-105 transition"></button>
+                        <button onclick="selectAvatarColor('#8b5cf6')" class="w-7 h-7 rounded-full bg-[#8b5cf6] border-2 border-white/20 hover:scale-105 transition"></button>
+                        <button onclick="selectAvatarColor('#ec4899')" class="w-7 h-7 rounded-full bg-[#ec4899] border-2 border-white/20 hover:scale-105 transition"></button>
+                        <button onclick="selectAvatarColor('#06b6d4')" class="w-7 h-7 rounded-full bg-[#06b6d4] border-2 border-white/20 hover:scale-105 transition"></button>
+                    </div>
+                </div>
+
+                <!-- Audio Input Selector -->
+                <div>
+                    <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1.5">Устройство ввода (Микрофон)</label>
+                    <select id="audioInputSelect" onchange="changeAudioDevice()" class="w-full bg-carbon border border-line focus:border-blurple rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none"><option value="CCIJWkk7Oy3FHoZH4KPHX3zX+3CTyaPkgpky5rxj9/I=">Микрофон (picun G2)</option><option value="/+PBAvRNE/zAjBTiZxMnNQsLlwhkmR8jtHMadpbojBo=">Virtual Mic (Virtual Mic for AudioRelay)</option><option value="eO7HSR4QQBYbjJOsCSuJ/C5aHxQUo79e9gowsrzXKGw=">Микрофон (Steam Streaming Microphone)</option><option value="bDX7dtssbmY1TPn4vNUWoeLrzohGC/juAATLHFGgPaQ=">Микрофон (PicoStreamingMicrophone)</option><option value="jht3m341AapvdK5zV6nEU2L6LO06fGCFTtaT5OOKFgw=">Набор микрофонов (Pico Streaming Speaker)</option><option value="ND2GvhpgcucFN6fRO/pMLbBUXZUaVV9O+j72Yp8KzQs=">Микрофон (e2eSoft iVCam)</option></select>
+                </div>
+
+                <!-- Audio Output Selector -->
+                <div>
+                    <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1.5">Устройство вывода (Наушники / Динамики)</label>
+                    <select id="audioOutputSelect" onchange="changeAudioOutput()" class="w-full bg-carbon border border-line focus:border-blurple rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none"></select>
+                </div>
+
+                <!-- Voice Processing Toggle -->
+                <div class="pt-1">
+                    <div class="flex items-center justify-between bg-carbon border border-line rounded-lg p-3">
+                        <div>
+                            <div class="font-semibold text-white text-xs">Шумоподавление и Эхоподавление</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5">Отключи для передачи чистого звука / музыки без сжатия</div>
+                        </div>
+                        <input id="dspToggle" type="checkbox" checked="" onchange="toggleVoiceProcessing(this.checked)" class="w-4 h-4 accent-blurple cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3.5 bg-carbon/60 border-t border-line flex justify-end gap-2">
+                <button onclick="saveProfileSettings()" class="px-4 py-2 rounded-lg bg-blurple hover:bg-blurpleHover text-white font-semibold text-xs transition">
+                    Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden 2x2 dummy canvas so WebRTC always negotiates a video track for instant replaceTrack() -->
+    <canvas id="dummyCanvas" width="2" height="2" class="hidden"></canvas>
+
+    <!-- MAIN 3-COLUMN DISCORD WORKSPACE -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- ================================================================
+             1. LEFT SIDEBAR (260px)
+             ================================================================ -->
+        <aside class="w-[260px] shrink-0 bg-graphite border-r border-line flex flex-col justify-between select-none">
+
+            <!-- Top Brand Header -->
+            <div>
+                <div class="h-12 px-4 border-b border-line flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-blurple shadow-[0_0_10px_#5865F2]"></div>
+                        <span class="font-mono font-bold text-sm tracking-tight text-white">Wal1dAT3</span>
+                        <span class="px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-surface text-slate-400 border border-line rounded">P2P</span>
+                    </div>
+                    <button onclick="downloadSelfHtml()" class="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-surface transition" title="Скачать Wal1dAT3.html для хостинга">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Connection Block -->
+                <div class="p-3 space-y-3 border-b border-line">
+                    <!-- My Room ID -->
+                    <div>
+                        <div class="flex items-center justify-between text-[10px] font-mono uppercase text-slate-400 mb-1">
+                            <span>Твой ID комнаты</span>
+                            <span id="peerReadyDot" class="text-warnAmber">● подключение...</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <div class="flex-1 flex items-center bg-carbon border border-line rounded-md px-2.5 py-1.5">
+                                <input id="myRoomIdInput" type="text" maxlength="8" value="-----" class="w-full bg-transparent font-mono font-bold text-xs text-white uppercase tracking-wider focus:outline-none" title="Можно вписать свой ID и нажать кнопку обновления">
+                                <button onclick="applyCustomRoomId()" class="text-slate-400 hover:text-white ml-1" title="Обновить / применить ID">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                </button>
+                            </div>
+                            <button onclick="copyRoomId()" class="p-2 rounded-md bg-surface hover:bg-surfaceHover border border-line text-slate-300 hover:text-white transition" title="Скопировать ID">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                            </button>
+                            <button onclick="copyInviteLink()" class="p-2 rounded-md bg-surface hover:bg-surfaceHover border border-line text-slate-300 hover:text-white transition" title="Скопировать прямую ссылку (?room=ID)">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Join by ID -->
+                    <div>
+                        <div class="text-[10px] font-mono uppercase text-slate-400 mb-1">Подключиться по ID</div>
+                        <div class="flex items-center gap-1.5">
+                            <input id="targetRoomIdInput" type="text" maxlength="8" placeholder="ID комнаты..." class="flex-1 bg-carbon border border-line focus:border-blurple rounded-md px-2.5 py-1.5 font-mono font-bold text-xs text-white uppercase tracking-wider placeholder-slate-600 focus:outline-none" onkeydown="if(event.key==='Enter') joinRoom()">
+                            <button onclick="joinRoom()" class="px-3 py-1.5 rounded-md bg-blurple hover:bg-blurpleHover text-white font-semibold text-xs transition shrink-0">
+                                Войти
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice Channel Tree (Discord style) -->
+                <div class="p-2.5">
+                    <div class="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                        <span>Голосовые каналы</span>
+                    </div>
+
+                    <!-- Channel Header -->
+                    <div class="mt-0.5 px-2 py-1.5 rounded-md bg-surface/70 text-slate-200 flex items-center justify-between text-xs font-medium">
+                        <div class="flex items-center gap-2 truncate">
+                            <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                            <span id="treeChannelName" class="truncate">Комната #VNHLB</span>
+                        </div>
+                        <span id="treeCountBadge" class="text-[10px] font-mono text-slate-400">1/2</span>
+                    </div>
+
+                    <!-- Connected Members List under Voice Channel -->
+                    <div class="mt-1 pl-6 pr-1 space-y-1">
+                        <!-- Local Member Row -->
+                        <div class="flex items-center justify-between py-1 px-2 rounded hover:bg-surface/50">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <div id="treeLocalAvatar" class="w-6 h-6 rounded-full bg-blurple flex items-center justify-center text-[11px] font-bold text-white shrink-0 transition-shadow" style="background-color: rgb(88, 101, 242);">U</div>
+                                <span id="treeLocalNick" class="text-xs text-slate-200 truncate">User</span>
+                            </div>
+                            <div class="flex items-center gap-1 text-slate-400">
+                                <span id="treeLocalStreamTag" class="hidden px-1 py-0.2 bg-dangerRed text-white font-mono font-bold text-[9px] rounded">ЭФИР</span>
+                                <svg id="treeLocalMuteIcon" class="w-3.5 h-3.5 text-dangerRed hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18"></path></svg>
+                            </div>
+                        </div>
+
+                        <!-- Remote Member Row (Hidden until connected) -->
+                        <div id="treeRemoteRow" class="hidden items-center justify-between py-1 px-2 rounded hover:bg-surface/50">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <div id="treeRemoteAvatar" class="w-6 h-6 rounded-full bg-voiceGreen flex items-center justify-center text-[11px] font-bold text-white shrink-0 transition-shadow">
+                                    K
+                                </div>
+                                <span id="treeRemoteNick" class="text-xs text-slate-200 truncate">Собеседник</span>
+                            </div>
+                            <div class="flex items-center gap-1 text-slate-400">
+                                <span id="treeRemoteStreamTag" class="hidden px-1 py-0.2 bg-dangerRed text-white font-mono font-bold text-[9px] rounded">ЭФИР</span>
+                                <svg id="treeRemoteMuteIcon" class="w-3.5 h-3.5 text-dangerRed hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Discord User Dock -->
+            <div class="bg-[#0e1015] border-t border-line">
+                <!-- Active Voice Connection Bar -->
+                <div id="voiceStatusPanel" class="hidden px-3 py-2 border-b border-line flex items-center justify-between bg-[#101319]">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5 text-voiceGreen font-semibold text-xs">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path></svg>
+                            <span>Голосовая связь</span>
+                        </div>
+                        <div class="text-[11px] font-mono text-slate-400 truncate mt-0.5">
+                            Пинг: <span id="dockPingValue" class="text-slate-200">-- ms</span> · P2P WebRTC
+                        </div>
+                    </div>
+                    <button onclick="leaveRoom()" class="p-1.5 rounded-md text-slate-400 hover:text-dangerRed hover:bg-surface transition" title="Отключиться">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"></path></svg>
+                    </button>
+                </div>
+
+                <!-- User Profile & Quick Mute/Deafen/Settings -->
+                <div class="px-2.5 py-2 flex items-center justify-between gap-1">
+                    <div onclick="toggleSettingsModal(true)" class="flex items-center gap-2 p-1 rounded-md hover:bg-surface cursor-pointer min-w-0 flex-1" title="Изменить никнейм и настройки">
+                        <div class="relative shrink-0">
+                            <div id="dockAvatar" class="w-8 h-8 rounded-full bg-blurple flex items-center justify-center font-bold text-xs text-white" style="background-color: rgb(88, 101, 242);">U</div>
+                            <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-voiceGreen ring-2 ring-[#0e1015]"></span>
+                        </div>
+                        <div class="min-w-0 leading-tight">
+                            <div id="dockNick" class="text-xs font-semibold text-white truncate">User</div>
+                            <div id="dockRoomSub" class="text-[10px] font-mono text-slate-400 truncate">#VNHLB</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center">
+                        <!-- Dock Mic Toggle -->
+                        <button id="dockMicBtn" onclick="toggleMic()" class="p-1.5 rounded-md text-slate-300 hover:text-white hover:bg-surface transition" title="Микрофон (Вкл/Выкл)">
+                            <svg id="dockMicIconOn" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                            <svg id="dockMicIconOff" class="w-4 h-4 text-dangerRed hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18"></path></svg>
+                        </button>
+                        <!-- Dock Deafen Toggle -->
+                        <button id="dockDeafenBtn" onclick="toggleDeafen()" class="p-1.5 rounded-md text-slate-300 hover:text-white hover:bg-surface transition" title="Звук (Отключить входящий звук)">
+                            <svg id="dockDeafenIconOn" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                            <svg id="dockDeafenIconOff" class="w-4 h-4 text-dangerRed hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>
+                        </button>
+                        <!-- Settings Gear -->
+                        <button onclick="toggleSettingsModal(true)" class="p-1.5 rounded-md text-slate-300 hover:text-white hover:bg-surface transition" title="Настройки">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- ================================================================
+             2. CENTER STAGE (VOICE CHANNEL & STREAM STAGE)
+             ================================================================ -->
+        <main class="flex-1 flex flex-col bg-carbon relative overflow-hidden">
+
+            <!-- Slim Top Channel Bar -->
+            <header class="h-12 px-4 border-b border-line bg-graphite/60 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                    <span id="stageChannelTitle" class="font-semibold text-sm text-white truncate">Голосовой канал</span>
+                    <span id="stageConnectionBadge" class="px-2 py-0.5 text-[11px] font-mono rounded bg-surface border border-line text-slate-400">
+                        Ожидание
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <!-- Toggle Stage Layout (Grid vs Focus) -->
+                    <button id="layoutToggleBtn" onclick="toggleStageLayout()" class="px-2.5 py-1.5 rounded-md bg-surface hover:bg-surfaceHover border border-line text-xs text-slate-300 hover:text-white flex items-center gap-1.5 transition" title="Переключить вид: Сетка / Фокус">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                        <span id="layoutModeText" class="hidden sm:inline">Сетка</span>
+                    </button>
+
+                    <!-- Toggle Right Chat Drawer -->
+                    <button id="chatToggleBtn" onclick="toggleChatPanel()" class="p-1.5 rounded-md bg-surface hover:bg-surfaceHover border border-line text-slate-300 hover:text-white relative transition" title="Показать / скрыть чат канала">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        <span id="unreadChatDot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-blurple"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Participant Grid / Stage -->
+            <div id="stageGrid" class="flex-1 p-4 pb-24 grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-center overflow-y-auto">
+
+                <!-- LOCAL PARTICIPANT TILE -->
+                <div id="localTile" class="group relative w-full h-full min-h-[220px] max-h-[72vh] bg-graphite border border-line rounded-xl overflow-hidden flex items-center justify-center transition-all duration-150">
+                    <!-- Video Element (Hidden when videoMode === 'none') -->
+                    <video id="localVideo" class="w-full h-full hidden" autoplay="" muted="" playsinline=""></video>
+
+                    <!-- Default Avatar Card View -->
+                    <div id="localAvatarView" class="flex flex-col items-center justify-center">
+                        <div id="stageLocalAvatar" class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-blurple flex items-center justify-center text-2xl md:text-3xl font-bold text-white transition-shadow duration-150" style="background-color: rgb(88, 101, 242);">U</div>
+                    </div>
+
+                    <!-- Top Right Badges (LIVE / Fullscreen / Fit) -->
+                    <div class="absolute top-3 right-3 flex items-center gap-1.5 z-20">
+                        <span id="localLiveBadge" class="hidden px-2 py-0.5 rounded bg-dangerRed text-white font-mono font-bold text-[10px] tracking-wider uppercase shadow">
+                            ● В ЭФИРЕ
+                        </span>
+                        <button id="localFitBtn" onclick="toggleVideoCover('localVideo')" class="hidden opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-black/70 hover:bg-black text-slate-200 border border-white/10 transition" title="Заполнить / Вписать">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                        </button>
+                        <button onclick="requestTileFullscreen('localTile')" class="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-black/70 hover:bg-black text-slate-200 border border-white/10 transition" title="На весь экран">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Bottom Left Nameplate -->
+                    <div class="absolute bottom-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/70 backdrop-blur-sm border border-white/10">
+                        <svg id="tileLocalMuteBadge" class="w-3.5 h-3.5 text-dangerRed hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18"></path></svg>
+                        <span id="stageLocalNick" class="text-xs font-medium text-white">User</span>
+                    </div>
+                </div>
+
+                <!-- REMOTE PARTICIPANT TILE -->
+                <div id="remoteTile" class="group relative w-full h-full min-h-[220px] max-h-[72vh] bg-graphite border border-line rounded-xl overflow-hidden flex items-center justify-center transition-all duration-150">
+                    <!-- Remote Video / Audio Stream -->
+                    <video id="remoteVideo" class="w-full h-full hidden" autoplay="" playsinline=""></video>
+
+                    <!-- Standby Empty State (Before Friend Connects) -->
+                    <div id="remoteWaitingView" class="flex flex-col items-center justify-center text-center p-6">
+                        <div class="w-16 h-16 rounded-full bg-surface border border-line flex items-center justify-center text-slate-500 mb-3">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </div>
+                        <div class="text-xs font-semibold text-slate-300">Ожидание собеседника</div>
+                        <div class="text-[11px] text-slate-500 mt-1 max-w-[220px]">Скопируй ссылку или ID комнаты слева и отправь кенту</div>
+                    </div>
+
+                    <!-- Connected Avatar View (When Friend is Voice-Only) -->
+                    <div id="remoteAvatarView" class="hidden flex-col items-center justify-center">
+                        <div id="stageRemoteAvatar" class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-voiceGreen flex items-center justify-center text-2xl md:text-3xl font-bold text-white transition-shadow duration-150">
+                            K
+                        </div>
+                    </div>
+
+                    <!-- Top Right Badges (LIVE / Volume / Fit / Fullscreen) -->
+                    <div class="absolute top-3 right-3 flex items-center gap-1.5 z-20">
+                        <span id="remoteLiveBadge" class="hidden px-2 py-0.5 rounded bg-dangerRed text-white font-mono font-bold text-[10px] tracking-wider uppercase shadow">
+                            ● В ЭФИРЕ
+                        </span>
+
+                        <!-- Hover Volume Control -->
+                        <div class="opacity-0 group-hover:opacity-100 flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/75 border border-white/10 transition">
+                            <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                            <input id="remoteVolumeSlider" type="range" min="0" max="100" value="100" oninput="setRemoteVolume(this.value)" class="w-16 h-1 cursor-pointer" title="Громкость собеседника">
+                        </div>
+
+                        <button id="remoteFitBtn" onclick="toggleVideoCover('remoteVideo')" class="hidden opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-black/70 hover:bg-black text-slate-200 border border-white/10 transition" title="Заполнить / Вписать">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                        </button>
+                        <button onclick="requestTileFullscreen('remoteTile')" class="opacity-0 group-hover:opacity-100 p-1.5 rounded-md bg-black/70 hover:bg-black text-slate-200 border border-white/10 transition" title="На весь экран">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Bottom Left Nameplate -->
+                    <div id="remoteNameplate" class="hidden absolute bottom-3 left-3 z-20 items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/70 backdrop-blur-sm border border-white/10">
+                        <svg id="tileRemoteMuteBadge" class="w-3.5 h-3.5 text-dangerRed hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18"></path></svg>
+                        <span id="stageRemoteNick" class="text-xs font-medium text-white">Собеседник</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Floating Bottom Call Controls Bar (Discord Style) -->
+            <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-2 rounded-2xl bg-[#14171f]/95 backdrop-blur-md border border-line shadow-2xl">
+                <!-- Mic Button -->
+                <button id="barMicBtn" onclick="toggleMic()" class="w-11 h-11 rounded-xl bg-surface hover:bg-surfaceHover text-slate-200 flex items-center justify-center transition" title="Микрофон">
+                    <svg id="barMicIconOn" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                    <svg id="barMicIconOff" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18"></path></svg>
+                </button>
+
+                <!-- Camera Button -->
+                <button id="barCamBtn" onclick="toggleCamera()" class="w-11 h-11 rounded-xl bg-surface hover:bg-surfaceHover text-slate-200 flex items-center justify-center transition" title="Камера">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                </button>
+
+                <!-- Screen Share Button (60 FPS) -->
+                <button id="barScreenBtn" onclick="toggleScreenShare()" class="w-11 h-11 rounded-xl bg-surface hover:bg-surfaceHover text-slate-200 flex items-center justify-center transition" title="Демонстрация экрана (60 FPS)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </button>
+
+                <!-- Deafen Button -->
+                <button id="barDeafenBtn" onclick="toggleDeafen()" class="w-11 h-11 rounded-xl bg-surface hover:bg-surfaceHover text-slate-200 flex items-center justify-center transition" title="Отключить звук">
+                    <svg id="barDeafenIconOn" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                    <svg id="barDeafenIconOff" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>
+                </button>
+
+                <div class="w-px h-6 bg-line mx-0.5"></div>
+
+                <!-- Disconnect Button -->
+                <button onclick="leaveRoom()" class="w-11 h-11 rounded-xl bg-dangerRed hover:brightness-110 text-white flex items-center justify-center transition" title="Отключиться">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 8l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M5 3a2 2 0 00-2 2v1c0 8.284 6.716 15 15 15h1a2 2 0 002-2v-3.28a1 1 0 00-.684-.948l-4.493-1.498a1 1 0 00-1.21.502l-1.13 2.257a11.042 11.042 0 01-5.516-5.517l2.257-1.128a1 1 0 00.502-1.21L9.228 3.683A1 1 0 008.279 3H5z"></path></svg>
+                </button>
+            </div>
+
+        </main>
+
+        <!-- ================================================================
+             3. RIGHT PANEL (COLLAPSIBLE CHANNEL TEXT CHAT, 320px)
+             ================================================================ -->
+        <aside id="chatDrawer" class="w-[320px] shrink-0 bg-graphite border-l border-line flex flex-col justify-between select-none">
+
+            <!-- Chat Header -->
+            <div class="h-12 px-4 border-b border-line flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400 font-mono font-bold text-sm">#</span>
+                    <span class="font-semibold text-xs text-white">чат-канала</span>
+                </div>
+                <button onclick="toggleChatPanel()" class="text-slate-400 hover:text-white p-1 rounded hover:bg-surface sm:hidden">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Messages Stream (Supports Drag & Drop) -->
+            <div id="chatMessages" class="flex-1 p-3.5 overflow-y-auto space-y-3 select-text text-xs" ondragover="event.preventDefault(); this.classList.add('bg-surface/40');" ondragleave="this.classList.remove('bg-surface/40');" ondrop="handleChatFileDrop(event)">
+
+                <div class="p-3 rounded-lg bg-carbon/60 border border-line text-slate-400 text-[11px] leading-relaxed">
+                    <div class="font-semibold text-slate-200 mb-0.5">Прямой P2P чат</div>
+                    Сообщения и файлы передаются напрямую через WebRTC DataChannel. Поддерживается вставка скриншотов через <span class="font-mono text-slate-300">Ctrl+V</span>.
+                </div>
+
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-3 border-t border-line bg-carbon/40">
+                <div class="flex items-center gap-1.5 bg-carbon border border-line focus-within:border-blurple rounded-lg px-2.5 py-1.5">
+                    <label class="p-1 text-slate-400 hover:text-white cursor-pointer rounded hover:bg-surface transition shrink-0" title="Прикрепить файл или изображение">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+                        <input type="file" class="hidden" onchange="handleChatFileInput(event)">
+                    </label>
+                    <input id="chatTextInput" type="text" placeholder="Написать в #чат-канала..." class="flex-1 bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none" onkeydown="if(event.key==='Enter') sendChat()">
+                    <button onclick="sendChat()" class="p-1 text-slate-400 hover:text-blurple transition shrink-0" title="Отправить">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <!-- ================================================================
+         CORE P2P & MEDIA LOGIC
+         ================================================================ -->
+    <script>
+        const PEER_NAMESPACE = 'wal1dat3-p2p-';
+        const RTC_CONFIG = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' }
+            ]
+        };
+
+        // User Profile State
+        let myProfile = {
+            nick: localStorage.getItem('wal1_nick') || 'User',
+            color: localStorage.getItem('wal1_color') || '#5865F2'
+        };
+        let remoteProfile = {
+            nick: 'Собеседник',
+            color: '#23a55a',
+            muted: false,
+            videoMode: 'none' // 'none' | 'cam' | 'screen'
+        };
+
+        // Peer & Connection State
+        let peer = null;
+        let myRoomId = '';
+        let activeCall = null;
+        let dataConn = null;
+        let isConnected = false;
+
+        // Media State
+        let localStream = null;
+        let dummyVideoTrack = null;
+        let isMicMuted = false;
+        let isDeafened = false;
+        let localVideoMode = 'none'; // 'none' | 'cam' | 'screen'
+        let useVoiceProcessing = true;
+        let isFocusLayout = false;
+        let isChatOpen = true;
+
+        // Ping Telemetry
+        let pingTimer = null;
+
+        /****************************************************************
+         * 1. DUMMY VIDEO TRACK & AUDIO FALLBACK
+         * Ensures a video sender always exists in WebRTC SDP so turning
+         * on Camera or 60fps Screen Share mid-call works via replaceTrack()
+         * without dropping or renegotiating the call.
+         ****************************************************************/
+        function getDummyVideoTrack() {
+            if (dummyVideoTrack) return dummyVideoTrack;
+            const canvas = document.getElementById('dummyCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#08090c';
+            ctx.fillRect(0, 0, 2, 2);
+            const stream = canvas.captureStream(1);
+            dummyVideoTrack = stream.getVideoTracks()[0];
+            return dummyVideoTrack;
+        }
+
+        function createSilentAudioTrack() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const dst = ctx.createMediaStreamDestination();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            gain.gain.value = 0.00001;
+            osc.connect(gain);
+            gain.connect(dst);
+            osc.start();
+            return dst.stream.getAudioTracks()[0];
+        }
+
+        /****************************************************************
+         * 2. INITIALIZE LOCAL AUDIO & VAD (VOICE ACTIVITY DETECTION)
+         ****************************************************************/
+        async function initLocalAudio(deviceId = '') {
+            const audioConstraints = {
+                echoCancellation: useVoiceProcessing,
+                noiseSuppression: useVoiceProcessing,
+                autoGainControl: useVoiceProcessing
+            };
+            if (deviceId) {
+                audioConstraints.deviceId = { exact: deviceId };
+            }
+
+            let audioTrack = null;
+            try {
+                const media = await navigator.mediaDevices.getUserMedia({
+                    audio: audioConstraints,
+                    video: false
+                });
+                audioTrack = media.getAudioTracks()[0];
+                populateAudioDevices();
+            } catch (err) {
+                showToast('Микрофон недоступен — активирован тихий канал', 'warn');
+                audioTrack = createSilentAudioTrack();
+            }
+
+            audioTrack.enabled = !isMicMuted;
+
+            if (!localStream) {
+                localStream = new MediaStream([getDummyVideoTrack(), audioTrack]);
+            } else {
+                const oldAudio = localStream.getAudioTracks()[0];
+                if (oldAudio) {
+                    localStream.removeTrack(oldAudio);
+                    oldAudio.stop();
+                }
+                localStream.addTrack(audioTrack);
+
+                if (activeCall && activeCall.peerConnection) {
+                    const sender = activeCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'audio');
+                    if (sender) sender.replaceTrack(audioTrack);
+                }
+            }
+
+            document.getElementById('localVideo').srcObject = localStream;
+            attachVoiceActivityDetector(localStream, 'local');
+        }
+
+        function attachVoiceActivityDetector(stream, target) {
+            try {
+                if (!stream || stream.getAudioTracks().length === 0) return;
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioCtx.createMediaStreamSource(stream);
+                const analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 64;
+                analyser.smoothingTimeConstant = 0.5;
+                source.connect(analyser);
+
+                const data = new Uint8Array(analyser.frequencyBinCount);
+
+                function checkVoice() {
+                    requestAnimationFrame(checkVoice);
+                    if (target === 'local' && isMicMuted) {
+                        setSpeakingUI('local', false);
+                        return;
+                    }
+                    if (target === 'remote' && (remoteProfile.muted || isDeafened)) {
+                        setSpeakingUI('remote', false);
+                        return;
+                    }
+
+                    analyser.getByteFrequencyData(data);
+                    let sum = 0;
+                    for (let i = 0; i < data.length; i++) sum += data[i];
+                    const avg = sum / data.length;
+                    setSpeakingUI(target, avg > 18);
+                }
+                checkVoice();
+            } catch (e) {}
+        }
+
+        function setSpeakingUI(target, speaking) {
+            const tile = document.getElementById(target === 'local' ? 'localTile' : 'remoteTile');
+            const stageAv = document.getElementById(target === 'local' ? 'stageLocalAvatar' : 'stageRemoteAvatar');
+            const treeAv = document.getElementById(target === 'local' ? 'treeLocalAvatar' : 'treeRemoteAvatar');
+
+            if (speaking) {
+                tile.classList.add('tile-speaking');
+                stageAv.classList.add('avatar-speaking');
+                treeAv.classList.add('tree-avatar-speaking');
+            } else {
+                tile.classList.remove('tile-speaking');
+                stageAv.classList.remove('avatar-speaking');
+                treeAv.classList.remove('tree-avatar-speaking');
+            }
+        }
+
+        /****************************************************************
+         * 3. PEERJS SIGNALING & ROOM MANAGEMENT
+         ****************************************************************/
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let res = '';
+            for (let i = 0; i < 5; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+            return res;
+        }
+
+        function initPeerNode(code) {
+            if (peer) peer.destroy();
+
+            myRoomId = (code || generateRoomCode()).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+            document.getElementById('myRoomIdInput').value = myRoomId;
+            document.getElementById('dockRoomSub').textContent = `#${myRoomId}`;
+            document.getElementById('treeChannelName').textContent = `Комната #${myRoomId}`;
+
+            const dot = document.getElementById('peerReadyDot');
+            dot.textContent = '● подключение...';
+            dot.className = 'text-warnAmber';
+
+            peer = new Peer(PEER_NAMESPACE + myRoomId, {
+                config: RTC_CONFIG,
+                debug: 1
+            });
+
+            peer.on('open', () => {
+                dot.textContent = '● онлайн';
+                dot.className = 'text-voiceGreen';
+
+                // Check URL ?room=XXXX parameter for auto-join
+                const urlParams = new URLSearchParams(window.location.search);
+                const roomParam = urlParams.get('room');
+                if (roomParam && roomParam.toUpperCase() !== myRoomId && !isConnected) {
+                    const cleanTarget = roomParam.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+                    document.getElementById('targetRoomIdInput').value = cleanTarget;
+                    setTimeout(() => joinRoom(), 300);
+                }
+            });
+
+            peer.on('call', (incomingCall) => {
+                incomingCall.answer(localStream);
+                setupMediaCall(incomingCall);
+            });
+
+            peer.on('connection', (incomingConn) => {
+                setupDataChannel(incomingConn);
+            });
+
+            peer.on('error', (err) => {
+                if (err.type === 'unavailable-id') {
+                    showToast('ID уже занят, генерирую новый...', 'warn');
+                    setTimeout(() => initPeerNode(generateRoomCode()), 400);
+                } else if (err.type === 'peer-unavailable') {
+                    showToast('Комната с таким ID не найдена', 'error');
+                    updateConnectionStateUI(false);
+                }
+            });
+        }
+
+        function applyCustomRoomId() {
+            const val = document.getElementById('myRoomIdInput').value.trim().toUpperCase();
+            const nextId = (val && val !== myRoomId) ? val : generateRoomCode();
+            initPeerNode(nextId);
+            showToast(`Твой ID комнаты: ${myRoomId}`);
+        }
+
+        function joinRoom() {
+            const targetCode = document.getElementById('targetRoomIdInput').value.trim().toUpperCase();
+            if (!targetCode) {
+                showToast('Введи ID комнаты собеседника', 'warn');
+                return;
+            }
+            if (targetCode === myRoomId) {
+                showToast('Это твой собственный ID комнаты', 'warn');
+                return;
+            }
+
+            const fullPeerId = PEER_NAMESPACE + targetCode;
+            document.getElementById('stageConnectionBadge').textContent = `Подключение к #${targetCode}...`;
+
+            const conn = peer.connect(fullPeerId, { reliable: true });
+            setupDataChannel(conn);
+
+            const call = peer.call(fullPeerId, localStream);
+            setupMediaCall(call);
+        }
+
+        function setupMediaCall(call) {
+            if (activeCall && activeCall !== call) activeCall.close();
+            activeCall = call;
+
+            call.on('stream', (remoteStream) => {
+                const remoteVideo = document.getElementById('remoteVideo');
+                remoteVideo.srcObject = remoteStream;
+                remoteVideo.muted = isDeafened;
+
+                isConnected = true;
+                updateConnectionStateUI(true);
+                attachVoiceActivityDetector(remoteStream, 'remote');
+            });
+
+            call.on('close', () => handleRemoteDisconnect());
+            call.on('error', () => handleRemoteDisconnect());
+        }
+
+        function setupDataChannel(conn) {
+            if (dataConn && dataConn !== conn) dataConn.close();
+            dataConn = conn;
+
+            conn.on('open', () => {
+                isConnected = true;
+                updateConnectionStateUI(true);
+                sendStateSync();
+                startPingLoop();
+                appendSystemChatMessage(`Подключен к голосовому каналу`);
+            });
+
+            conn.on('data', (msg) => {
+                if (!msg || typeof msg !== 'object') return;
+
+                switch (msg.type) {
+                    case 'sync':
+                        remoteProfile.nick = msg.nick || 'Собеседник';
+                        remoteProfile.color = msg.color || '#23a55a';
+                        remoteProfile.muted = !!msg.muted;
+                        remoteProfile.videoMode = msg.videoMode || 'none';
+                        refreshRemoteParticipantUI();
+                        break;
+                    case 'ping':
+                        conn.send({ type: 'pong', ts: msg.ts });
+                        break;
+                    case 'pong':
+                        const rtt = Math.max(1, Date.now() - msg.ts);
+                        document.getElementById('dockPingValue').textContent = `${rtt} ms`;
+                        document.getElementById('stageConnectionBadge').textContent = `${rtt} ms · P2P`;
+                        break;
+                    case 'chat':
+                        appendChatMessage(remoteProfile.nick, remoteProfile.color, msg.text, false);
+                        break;
+                    case 'file':
+                        appendFileMessage(remoteProfile.nick, remoteProfile.color, msg.name, msg.mime, msg.data, false);
+                        break;
+                }
+            });
+
+            conn.on('close', () => handleRemoteDisconnect());
+        }
+
+        function sendStateSync() {
+            if (dataConn && dataConn.open) {
+                dataConn.send({
+                    type: 'sync',
+                    nick: myProfile.nick,
+                    color: myProfile.color,
+                    muted: isMicMuted,
+                    videoMode: localVideoMode
+                });
+            }
+        }
+
+        function leaveRoom() {
+            if (activeCall) { activeCall.close(); activeCall = null; }
+            if (dataConn) { dataConn.close(); dataConn = null; }
+            handleRemoteDisconnect();
+            showToast('Отключен от голосового канала');
+        }
+
+        function handleRemoteDisconnect() {
+            isConnected = false;
+            remoteProfile.videoMode = 'none';
+            if (pingTimer) { clearInterval(pingTimer); pingTimer = null; }
+            updateConnectionStateUI(false);
+        }
+
+        function startPingLoop() {
+            if (pingTimer) clearInterval(pingTimer);
+            pingTimer = setInterval(() => {
+                if (dataConn && dataConn.open) {
+                    dataConn.send({ type: 'ping', ts: Date.now() });
+                }
+            }, 2000);
+        }
+
+        /****************************************************************
+         * 4. MEDIA CONTROLS: MIC, DEAFEN, CAMERA, 60FPS SCREEN SHARE
+         ****************************************************************/
+        function replaceVideoTrack(newTrack, mode) {
+            if (!localStream) return;
+            const oldVideo = localStream.getVideoTracks()[0];
+            if (oldVideo) {
+                localStream.removeTrack(oldVideo);
+                if (oldVideo !== dummyVideoTrack) oldVideo.stop();
+            }
+            localStream.addTrack(newTrack);
+            document.getElementById('localVideo').srcObject = localStream;
+
+            if (activeCall && activeCall.peerConnection) {
+                const sender = activeCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+                if (sender) sender.replaceTrack(newTrack);
+            }
+
+            localVideoMode = mode;
+            refreshLocalParticipantUI();
+            sendStateSync();
+        }
+
+        function toggleMic() {
+            isMicMuted = !isMicMuted;
+            if (localStream) {
+                localStream.getAudioTracks().forEach(t => t.enabled = !isMicMuted);
+            }
+            refreshLocalParticipantUI();
+            sendStateSync();
+        }
+
+        function toggleDeafen() {
+            isDeafened = !isDeafened;
+            const remoteVid = document.getElementById('remoteVideo');
+            if (remoteVid) remoteVid.muted = isDeafened;
+
+            if (isDeafened && !isMicMuted) {
+                isMicMuted = true;
+                if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = false);
+            }
+            refreshLocalParticipantUI();
+            sendStateSync();
+        }
+
+        async function toggleCamera() {
+            if (localVideoMode === 'cam') {
+                replaceVideoTrack(getDummyVideoTrack(), 'none');
+                return;
+            }
+            try {
+                const camStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } }
+                });
+                const camTrack = camStream.getVideoTracks()[0];
+                camTrack.onended = () => replaceVideoTrack(getDummyVideoTrack(), 'none');
+                replaceVideoTrack(camTrack, 'cam');
+            } catch (err) {
+                showToast('Камера недоступна или запрещена', 'error');
+            }
+        }
+
+        async function toggleScreenShare() {
+            if (localVideoMode === 'screen') {
+                replaceVideoTrack(getDummyVideoTrack(), 'none');
+                return;
+            }
+            try {
+                const displayStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { frameRate: { ideal: 60, max: 60 } },
+                    audio: true
+                });
+                const screenTrack = displayStream.getVideoTracks()[0];
+                screenTrack.onended = () => replaceVideoTrack(getDummyVideoTrack(), 'none');
+                replaceVideoTrack(screenTrack, 'screen');
+            } catch (err) {
+                // User cancelled screen picker
+            }
+        }
+
+        function setRemoteVolume(val) {
+            const remoteVid = document.getElementById('remoteVideo');
+            if (remoteVid) {
+                remoteVid.volume = Number(val) / 100;
+            }
+        }
+
+        /****************************************************************
+         * 5. UI SYNCHRONIZATION & STAGE LAYOUT
+         ****************************************************************/
+        function refreshLocalParticipantUI() {
+            const initial = (myProfile.nick.trim()[0] || 'U').toUpperCase();
+
+            // Avatars & Nicks
+            ['dockAvatar', 'treeLocalAvatar', 'stageLocalAvatar'].forEach(id => {
+                const el = document.getElementById(id);
+                el.textContent = initial;
+                el.style.backgroundColor = myProfile.color;
+            });
+            ['dockNick', 'treeLocalNick', 'stageLocalNick'].forEach(id => {
+                document.getElementById(id).textContent = myProfile.nick;
+            });
+
+            // Mic UI
+            document.getElementById('dockMicIconOn').classList.toggle('hidden', isMicMuted);
+            document.getElementById('dockMicIconOff').classList.toggle('hidden', !isMicMuted);
+            document.getElementById('barMicIconOn').classList.toggle('hidden', isMicMuted);
+            document.getElementById('barMicIconOff').classList.toggle('hidden', !isMicMuted);
+            document.getElementById('treeLocalMuteIcon').classList.toggle('hidden', !isMicMuted);
+            document.getElementById('tileLocalMuteBadge').classList.toggle('hidden', !isMicMuted);
+
+            const barMicBtn = document.getElementById('barMicBtn');
+            barMicBtn.className = isMicMuted
+                ? 'w-11 h-11 rounded-xl bg-dangerRed text-white flex items-center justify-center transition'
+                : 'w-11 h-11 rounded-xl bg-surface hover:bg-surfaceHover text-slate-200 flex items-center justify-center transition';
+
+            // Deafen UI
+            document.getElementById('dockDeafenIconOn').classList.toggle('hidden', isDeafened);
+            document.getElementById('dockDeafenIconOff').classList.toggle('hidden', !isDeafened);
+            document.getElementById('barDeafenIconOn').classList.toggle('hidden', isDeafened);
+            document.getElementById('barDeafenIconOff').classList.toggle('hidden', !isDeafened);
+
+            const barDeafenBtn = document.getElementById('barDeafenBtn');
+            barDeafenBtn.className = isDeafened
+                ? 'w-11 h-11 rounded-xl bg-dangerRed text-white flex items-center justify-center transition'
+                : 'w-11 h-11 rounded-xl bg-surface hover:bg-surfaceHover text-slate-200 flex items-center justify-center transition';
+
+            // Video / Screen Share UI
+            const hasVideo = localVideoMode !== 'none';
+            document.getElementById('localVideo').classList.toggle('hidden', !hasVideo);
+            document.getElementById('localAvatarView').classList.toggle('hidden', hasVideo);
+            document.getElementById('localLiveBadge').classList.toggle('hidden', !hasVideo);
+            document.getElementById('localFitBtn').classList.toggle('hidden', !hasVideo);
+            document.getElementById('treeLocalStreamTag').classList.toggle('hidden', !hasVideo);
+
+            document.getElementById('barCamBtn').className = localVideoMode === 'cam'
+                ? 'w-11 h-11 rounded-xl bg-blurple text-white flex items-center justify-center transition'
+                : 'w-11 h-11 rounded-xl bg-surface hover:bg-surfaceHover text-slate-200 flex items-center justify-center transition';
+
+            document.getElementById('barScreenBtn').className = localVideoMode === 'screen'
+                ? 'w-11 h-11 rounded-xl bg-voiceGreen text-white flex items-center justify-center transition'
+                : 'w-11 h-11 rounded-xl bg-surface hover:bg-surfaceHover text-slate-200 flex items-center justify-center transition';
+        }
+
+        function refreshRemoteParticipantUI() {
+            const initial = (remoteProfile.nick.trim()[0] || 'K').toUpperCase();
+            ['treeRemoteAvatar', 'stageRemoteAvatar'].forEach(id => {
+                const el = document.getElementById(id);
+                el.textContent = initial;
+                el.style.backgroundColor = remoteProfile.color;
+            });
+            ['treeRemoteNick', 'stageRemoteNick'].forEach(id => {
+                document.getElementById(id).textContent = remoteProfile.nick;
+            });
+
+            document.getElementById('treeRemoteMuteIcon').classList.toggle('hidden', !remoteProfile.muted);
+            document.getElementById('tileRemoteMuteBadge').classList.toggle('hidden', !remoteProfile.muted);
+
+            const hasVideo = isConnected && remoteProfile.videoMode !== 'none';
+            document.getElementById('remoteVideo').classList.toggle('hidden', !hasVideo);
+            document.getElementById('remoteAvatarView').classList.toggle('hidden', !isConnected || hasVideo);
+            document.getElementById('remoteAvatarView').classList.toggle('flex', isConnected && !hasVideo);
+            document.getElementById('remoteLiveBadge').classList.toggle('hidden', !hasVideo);
+            document.getElementById('remoteFitBtn').classList.toggle('hidden', !hasVideo);
+            document.getElementById('treeRemoteStreamTag').classList.toggle('hidden', !hasVideo);
+
+            // Auto-focus stage when remote starts screen share
+            if (remoteProfile.videoMode === 'screen' && !isFocusLayout) {
+                toggleStageLayout(true);
+            }
+        }
+
+        function updateConnectionStateUI(connected) {
+            document.getElementById('voiceStatusPanel').classList.toggle('hidden', !connected);
+            document.getElementById('treeRemoteRow').classList.toggle('hidden', !connected);
+            document.getElementById('treeRemoteRow').classList.toggle('flex', connected);
+            document.getElementById('treeCountBadge').textContent = connected ? '2/2' : '1/2';
+
+            document.getElementById('remoteWaitingView').classList.toggle('hidden', connected);
+            document.getElementById('remoteNameplate').classList.toggle('hidden', !connected);
+            document.getElementById('remoteNameplate').classList.toggle('flex', connected);
+
+            if (!connected) {
+                document.getElementById('stageConnectionBadge').textContent = 'Ожидание';
+                document.getElementById('dockPingValue').textContent = '-- ms';
+                setSpeakingUI('remote', false);
+            }
+            refreshRemoteParticipantUI();
+        }
+
+        function toggleStageLayout(forceFocus) {
+            isFocusLayout = typeof forceFocus === 'boolean' ? forceFocus : !isFocusLayout;
+            const grid = document.getElementById('stageGrid');
+            const label = document.getElementById('layoutModeText');
+
+            if (isFocusLayout) {
+                grid.className = 'flex-1 p-4 pb-24 grid grid-cols-1 gap-4 items-center justify-center overflow-y-auto';
+                label.textContent = 'Фокус';
+            } else {
+                grid.className = 'flex-1 p-4 pb-24 grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-center overflow-y-auto';
+                label.textContent = 'Сетка';
+            }
+        }
+
+        function toggleVideoCover(videoId) {
+            document.getElementById(videoId).classList.toggle('cover-mode');
+        }
+
+        function requestTileFullscreen(tileId) {
+            const el = document.getElementById(tileId);
+            if (!document.fullscreenElement) {
+                if (el.requestFullscreen) el.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        function toggleChatPanel() {
+            isChatOpen = !isChatOpen;
+            const drawer = document.getElementById('chatDrawer');
+            drawer.classList.toggle('hidden', !isChatOpen);
+            if (isChatOpen) {
+                document.getElementById('unreadChatDot').classList.add('hidden');
+            }
+        }
+
+        /****************************************************************
+         * 6. P2P CHAT, CLIPBOARD PASTE & FILE SHARING
+         ****************************************************************/
+        function sendChat() {
+            const input = document.getElementById('chatTextInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendChatMessage(myProfile.nick, myProfile.color, text, true);
+            input.value = '';
+
+            if (dataConn && dataConn.open) {
+                dataConn.send({ type: 'chat', text });
+            }
+        }
+
+        function appendChatMessage(nick, color, text, isSelf) {
+            const box = document.getElementById('chatMessages');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const initial = (nick.trim()[0] || 'U').toUpperCase();
+
+            const item = document.createElement('div');
+            item.className = 'flex items-start gap-2.5 group';
+            item.innerHTML = `
+                <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px] text-white shrink-0 mt-0.5" style="background-color: ${color}">
+                    ${initial}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-baseline gap-2">
+                        <span class="font-semibold text-xs text-white truncate"></span>
+                        <span class="text-[10px] font-mono text-slate-500">${time}</span>
+                    </div>
+                    <div class="text-slate-200 text-xs break-words leading-relaxed mt-0.5 msg-body"></div>
+                </div>
+            `;
+            item.querySelector('span.font-semibold').textContent = nick;
+            item.querySelector('.msg-body').textContent = text;
+            box.appendChild(item);
+            box.scrollTop = box.scrollHeight;
+
+            if (!isSelf && !isChatOpen) {
+                document.getElementById('unreadChatDot').classList.remove('hidden');
+            }
+        }
+
+        function appendSystemChatMessage(text) {
+            const box = document.getElementById('chatMessages');
+            const el = document.createElement('div');
+            el.className = 'text-[11px] font-mono text-slate-500 text-center py-1';
+            el.textContent = `— ${text} —`;
+            box.appendChild(el);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function handleChatFileInput(e) {
+            const file = e.target.files[0];
+            if (file) sendFileOverP2P(file);
+            e.target.value = '';
+        }
+
+        function handleChatFileDrop(e) {
+            e.preventDefault();
+            document.getElementById('chatMessages').classList.remove('bg-surface/40');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                sendFileOverP2P(e.dataTransfer.files[0]);
+            }
+        }
+
+        window.addEventListener('paste', (e) => {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (const item of items) {
+                if (item.type.indexOf('image') === 0) {
+                    sendFileOverP2P(item.getAsFile());
+                }
+            }
+        });
+
+        function sendFileOverP2P(file) {
+            if (file.size > 15 * 1024 * 1024) {
+                showToast('Максимальный размер файла для P2P: 15 МБ', 'error');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+                const dataUrl = reader.result;
+                appendFileMessage(myProfile.nick, myProfile.color, file.name, file.type, dataUrl, true);
+                if (dataConn && dataConn.open) {
+                    dataConn.send({
+                        type: 'file',
+                        name: file.name,
+                        mime: file.type,
+                        data: dataUrl
+                    });
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function appendFileMessage(nick, color, fileName, mime, dataUrl, isSelf) {
+            const box = document.getElementById('chatMessages');
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const initial = (nick.trim()[0] || 'U').toUpperCase();
+            const isImg = mime && mime.startsWith('image/');
+
+            const item = document.createElement('div');
+            item.className = 'flex items-start gap-2.5';
+            item.innerHTML = `
+                <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px] text-white shrink-0 mt-0.5" style="background-color: ${color}">
+                    ${initial}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-baseline gap-2 mb-1">
+                        <span class="font-semibold text-xs text-white truncate">${nick}</span>
+                        <span class="text-[10px] font-mono text-slate-500">${time}</span>
+                    </div>
+                    ${isImg ? `<img src="${dataUrl}" onclick="openLightbox('${dataUrl}')" class="rounded-lg max-h-44 w-auto border border-line cursor-zoom-in mb-1.5 hover:brightness-110 transition" alt="Image" />` : ''}
+                    <div class="flex items-center justify-between gap-2 bg-carbon border border-line px-2.5 py-1.5 rounded-md">
+                        <span class="font-mono text-[11px] text-slate-300 truncate">${fileName}</span>
+                        <a href="${dataUrl}" download="${fileName}" class="text-[11px] font-semibold text-blurple hover:underline shrink-0">Скачать</a>
+                    </div>
+                </div>
+            `;
+            box.appendChild(item);
+            box.scrollTop = box.scrollHeight;
+
+            if (!isSelf && !isChatOpen) {
+                document.getElementById('unreadChatDot').classList.remove('hidden');
+            }
+        }
+
+        function openLightbox(src) {
+            const modal = document.getElementById('lightboxModal');
+            document.getElementById('lightboxImg').src = src;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightboxModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        /****************************************************************
+         * 7. SETTINGS, DEVICES & EXPORT
+         ****************************************************************/
+        function toggleSettingsModal(show) {
+            const modal = document.getElementById('settingsModal');
+            if (show) {
+                document.getElementById('settingsNickInput').value = myProfile.nick;
+                populateAudioDevices();
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function selectAvatarColor(hex) {
+            myProfile.color = hex;
+            localStorage.setItem('wal1_color', hex);
+            refreshLocalParticipantUI();
+            sendStateSync();
+        }
+
+        function saveProfileSettings() {
+            const val = document.getElementById('settingsNickInput').value.trim();
+            if (val) {
+                myProfile.nick = val;
+                localStorage.setItem('wal1_nick', val);
+                refreshLocalParticipantUI();
+                sendStateSync();
+            }
+            toggleSettingsModal(false);
+            showToast('Настройки сохранены');
+        }
+
+        async function populateAudioDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const inSel = document.getElementById('audioInputSelect');
+                const outSel = document.getElementById('audioOutputSelect');
+                inSel.innerHTML = '';
+                outSel.innerHTML = '';
+
+                devices.forEach(d => {
+                    if (d.kind === 'audioinput') {
+                        const opt = document.createElement('option');
+                        opt.value = d.deviceId;
+                        opt.textContent = d.label || `Микрофон (${d.deviceId.slice(0, 5)})`;
+                        inSel.appendChild(opt);
+                    } else if (d.kind === 'audiooutput') {
+                        const opt = document.createElement('option');
+                        opt.value = d.deviceId;
+                        opt.textContent = d.label || `Динамики (${d.deviceId.slice(0, 5)})`;
+                        outSel.appendChild(opt);
+                    }
+                });
+            } catch (e) {}
+        }
+
+        function changeAudioDevice() {
+            const devId = document.getElementById('audioInputSelect').value;
+            initLocalAudio(devId);
+            showToast('Микрофон переключен');
+        }
+
+        async function changeAudioOutput() {
+            const devId = document.getElementById('audioOutputSelect').value;
+            const remoteVid = document.getElementById('remoteVideo');
+            if (remoteVid && typeof remoteVid.setSinkId === 'function') {
+                try {
+                    await remoteVid.setSinkId(devId);
+                    showToast('Устройство вывода изменено');
+                } catch (e) {}
+            }
+        }
+
+        function toggleVoiceProcessing(enabled) {
+            useVoiceProcessing = enabled;
+            const devId = document.getElementById('audioInputSelect').value;
+            initLocalAudio(devId);
+            showToast(enabled ? 'Шумоподавление включено' : 'Чистый звук без обработки включен');
+        }
+
+        function copyToClipboard(text, msg) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast(msg);
+        }
+
+        function copyRoomId() {
+            copyToClipboard(myRoomId, `ID комнаты [${myRoomId}] скопирован`);
+        }
+
+        function copyInviteLink() {
+            const baseUrl = window.location.href.split('?')[0];
+            const inviteUrl = `${baseUrl}?room=${myRoomId}`;
+            copyToClipboard(inviteUrl, 'Прямая ссылка-приглашение скопирована');
+        }
+
+        function downloadSelfHtml() {
+            const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Wal1dAT3.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Файл Wal1dAT3.html скачан');
+        }
+
+        function showToast(text, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            const colors = {
+                info: 'border-line text-slate-100',
+                warn: 'border-warnAmber/50 text-warnAmber',
+                error: 'border-dangerRed/50 text-dangerRed'
+            };
+            el.className = `bg-graphite/95 backdrop-blur-md border ${colors[type] || colors.info} px-3.5 py-2.5 rounded-lg shadow-xl text-xs font-medium transition-all duration-200`;
+            el.textContent = text;
+            container.appendChild(el);
+
+            setTimeout(() => {
+                el.classList.add('opacity-0', 'translate-x-2');
+                setTimeout(() => el.remove(), 200);
+            }, 2800);
+        }
+
+        // Boot Application
+        window.addEventListener('load', async () => {
+            refreshLocalParticipantUI();
+            await initLocalAudio();
+            initPeerNode(generateRoomCode());
+        });
+    </script>
+
+</body></html>
